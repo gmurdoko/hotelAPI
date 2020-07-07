@@ -63,6 +63,13 @@ func (s ReserveRepoImpl) AddReserve(inReserve *models.Reserves) error {
 		return err
 	}
 
+	query = "update m_rooms set status = 'B', edited_at = now() where id = ?;"
+	_, err = tx.Exec(query, inReserve.RoomID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	if err = tx.Commit(); err != nil {
 		return err
 	}
