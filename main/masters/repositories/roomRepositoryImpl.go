@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"hotelAPI/main/masters/models"
 	"log"
+	"time"
 )
 
 //RoomRepoImpl app
@@ -78,6 +79,40 @@ func (s RoomRepoImpl) SelectBookedRoom() ([]*models.Rooms, error) {
 		return nil, err
 	}
 	return result, nil
+}
+
+//AddRoom app
+func (s RoomRepoImpl) AddRoom(inRoom *models.Rooms) error {
+	inRoom.CreatedAt = time.Now().Format(`2006-01-02 15:04:05`)
+	inRoom.UpdatedAt = time.Now().Format(`2006-01-02 15:04:05`)
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	query := "insert into m_rooms(room_name, created_at, edited_at) values (?,?,?);"
+	res, err := tx.Exec(query, inRoom.RoomName, inRoom.CreatedAt, inRoom.UpdatedAt)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	lastID, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+	//insert into prices (room_id, price, created_at) values (3,300000,now());
+	inRoom.ID = int(lastID)
+	query = "insert into prices (room_id, price, created_at) values (?,?,?)"
+	res, err = tx.Exec(query, inRoom.ID, inRoom.Price, inRoom.CreatedAt)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 //InitRoomRepoImpl app

@@ -7,4 +7,5 @@ type RoomRepository interface {
 	SelectAvailableRoom() ([]*models.Rooms, error)
 	SelectBookedRoom() ([]*models.Rooms, error)
 	SelectAllRoom() ([]*models.Rooms, error)
+	AddRoom(inRoom *models.Rooms) error
 }

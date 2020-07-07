@@ -37,6 +37,15 @@ func (s RoomUsecaseImpl) GetAllRoom() ([]*models.Rooms, error) {
 	return rooms, nil
 }
 
+//PostRoom app
+func (s RoomUsecaseImpl) PostRoom(inRoom *models.Rooms) error {
+	err := s.roomRepo.AddRoom(inRoom)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 //InitRoomUsecaseImpl app
 func InitRoomUsecaseImpl(roomRepo repositories.RoomRepository) RoomUsecase {
 	return &RoomUsecaseImpl{roomRepo}
