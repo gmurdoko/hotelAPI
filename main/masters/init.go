@@ -16,4 +16,8 @@ func Init(r *mux.Router, db *sql.DB) {
 	roomUsecase := usecases.InitRoomUsecaseImpl(roomRepo)
 	controllers.RoomController(r, roomUsecase)
 
+	//Transaction
+	reserveRepo := repositories.InitReserveRepoImpl(db)
+	reserveUsecase := usecases.InitReserveUsecaseImpl(reserveRepo)
+	controllers.ReserveController(r, reserveUsecase)
 }
