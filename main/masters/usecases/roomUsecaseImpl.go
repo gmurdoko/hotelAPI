@@ -46,6 +46,24 @@ func (s RoomUsecaseImpl) PostRoom(inRoom *models.Rooms) error {
 	return nil
 }
 
+//PutRoom app
+func (s RoomUsecaseImpl) PutRoom(inRoom *models.Rooms) error {
+	err := s.roomRepo.EditRoom(inRoom)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+//DeleteRoom app
+func (s RoomUsecaseImpl) DeleteRoom(id int) error {
+	err := s.roomRepo.DelRoom(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 //InitRoomUsecaseImpl app
 func InitRoomUsecaseImpl(roomRepo repositories.RoomRepository) RoomUsecase {
 	return &RoomUsecaseImpl{roomRepo}

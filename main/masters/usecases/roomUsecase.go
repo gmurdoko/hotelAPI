@@ -10,8 +10,8 @@ type RoomUsecase interface {
 	GetBookedRoom() ([]*models.Rooms, error)
 	GetAllRoom() ([]*models.Rooms, error)
 	PostRoom(inRoom *models.Rooms) error
+	PutRoom(inRoom *models.Rooms) error
+	DeleteRoom(id int) error
 	// GetRoom(id int) (*models.Categories, error)
-	// DeleteRoom(id int) error
 
-	// PutRoom(inRoom *models.Categories) error
 }

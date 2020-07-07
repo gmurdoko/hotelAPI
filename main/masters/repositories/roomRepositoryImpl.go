@@ -14,7 +14,7 @@ type RoomRepoImpl struct {
 
 //SelectAvailableRoom app
 func (s RoomRepoImpl) SelectAvailableRoom() ([]*models.Rooms, error) {
-	data, err := s.db.Query("select mr.id, mr.room_name, p.price, mr.status, mr.created_at, mr.edited_at from m_rooms mr join prices p on mr.id = p.room_id where mr.status ='A';")
+	data, err := s.db.Query("select mr.id, mr.room_name, p.price, mr.status, mr.created_at, mr.edited_at from m_rooms mr join prices p on mr.id = p.room_id where mr.status ='A' and p.status ='A';")
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (s RoomRepoImpl) SelectAvailableRoom() ([]*models.Rooms, error) {
 
 //SelectAllRoom app
 func (s RoomRepoImpl) SelectAllRoom() ([]*models.Rooms, error) {
-	data, err := s.db.Query("select mr.id, mr.room_name, p.price, mr.status, mr.created_at, mr.edited_at from m_rooms mr join prices p on mr.id = p.room_id;")
+	data, err := s.db.Query("select mr.id, mr.room_name, p.price, mr.status, mr.created_at, mr.edited_at from m_rooms mr join prices p on mr.id = p.room_id where p.status ='A';")
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (s RoomRepoImpl) SelectAllRoom() ([]*models.Rooms, error) {
 
 //SelectBookedRoom app
 func (s RoomRepoImpl) SelectBookedRoom() ([]*models.Rooms, error) {
-	data, err := s.db.Query("select mr.id, mr.room_name, p.price, mr.status, mr.created_at, mr.edited_at from m_rooms mr join prices p on mr.id = p.room_id where mr.status ='B';")
+	data, err := s.db.Query("select mr.id, mr.room_name, p.price, mr.status, mr.created_at, mr.edited_at from m_rooms mr join prices p on mr.id = p.room_id where mr.status ='B' and p.status ='A';")
 	if err != nil {
 		return nil, err
 	}
@@ -101,8 +101,8 @@ func (s RoomRepoImpl) AddRoom(inRoom *models.Rooms) error {
 	}
 	//insert into prices (room_id, price, created_at) values (3,300000,now());
 	inRoom.ID = int(lastID)
-	query = "insert into prices (room_id, price, created_at) values (?,?,?)"
-	res, err = tx.Exec(query, inRoom.ID, inRoom.Price, inRoom.CreatedAt)
+	query = "insert into prices (room_id, price, created_at, edited_at) values (?,?,?,?)"
+	res, err = tx.Exec(query, inRoom.ID, inRoom.Price, inRoom.CreatedAt, inRoom.CreatedAt)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -112,6 +112,55 @@ func (s RoomRepoImpl) AddRoom(inRoom *models.Rooms) error {
 		return err
 	}
 
+	return nil
+}
+
+//EditRoom app
+func (s RoomRepoImpl) EditRoom(inRoom *models.Rooms) error {
+	tx, err := s.db.Begin()
+	inRoom.CreatedAt = time.Now().Format(`2006-01-02 15:04:05`)
+	inRoom.UpdatedAt = time.Now().Format(`2006-01-02 15:04:05`)
+	if err != nil {
+		return err
+	}
+	query := "update m_rooms set room_name = ?, status = ?, edited_at = ? where id = ?;"
+	_, err = tx.Exec(query, inRoom.RoomName, inRoom.Status, inRoom.UpdatedAt, inRoom.ID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	query = "update prices set status='D', edited_at = ? where room_id = ? and status = 'A';"
+	_, err = tx.Exec(query, inRoom.UpdatedAt, inRoom.ID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	query = "insert into prices (room_id, price, created_at, edited_at) values (?,?,?,?)"
+	_, err = tx.Exec(query, inRoom.ID, inRoom.Price, inRoom.CreatedAt, inRoom.UpdatedAt)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+	return nil
+}
+
+//DelRoom app
+func (s RoomRepoImpl) DelRoom(id int) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	query := "update m_rooms set status = 'D', edited_at = now() where id = ?;"
+	_, err = tx.Exec(query, id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
 	return nil
 }
 

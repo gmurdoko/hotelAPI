@@ -7,6 +7,7 @@ import (
 	"hotelAPI/utils"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -25,6 +26,8 @@ func RoomController(r *mux.Router, s usecases.RoomUsecase) {
 	cat.HandleFunc("/booked", roomHandler.ListBookedRooms).Methods(http.MethodGet)
 	cat = r.PathPrefix("/room").Subrouter()
 	cat.HandleFunc("", roomHandler.PostRoom).Methods(http.MethodPost)
+	cat.HandleFunc("", roomHandler.PutRoom).Methods(http.MethodPut)
+	cat.HandleFunc("/{id}", roomHandler.DeleteRoom).Methods(http.MethodDelete)
 
 }
 
@@ -135,4 +138,62 @@ func (s *RoomHandler) PostRoom(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Println("Endpoint hit: Post Room")
+}
+
+//PutRoom app
+func (s *RoomHandler) PutRoom(w http.ResponseWriter, r *http.Request) {
+	var inRoom models.Rooms
+	var roomResponse utils.Response
+	w.Header().Set("content-type", "application/json")
+	err := json.NewDecoder(r.Body).Decode(&inRoom)
+	if err != nil {
+		w.Write([]byte("cant read JSON"))
+	}
+	err = s.RoomUsecase.PutRoom(&inRoom)
+	if err != nil {
+		roomResponse.Status = http.StatusNotFound
+		roomResponse.Message = "Not Found"
+		roomResponse.Data = err
+		log.Println(err)
+		w.Write([]byte("Data Not Found"))
+	} else {
+		roomResponse.Status = http.StatusOK
+		roomResponse.Message = "Put Room Success"
+		roomResponse.Data = inRoom
+		byteOfRooms, err := json.Marshal(roomResponse)
+		if err != nil {
+			log.Println(err)
+			w.Write([]byte("Opps, Something Wrong"))
+		}
+		w.Write([]byte(byteOfRooms))
+	}
+	log.Println("Endpoint hit: Put Room")
+}
+
+// DeleteRoom app
+func (s *RoomHandler) DeleteRoom(w http.ResponseWriter, r *http.Request) {
+	ex := mux.Vars(r)
+	idINT, err := strconv.Atoi(ex["id"])
+	var roomResponse utils.Response
+	w.Header().Set("content-type", "application/json")
+	err = s.RoomUsecase.DeleteRoom(idINT)
+	if err != nil {
+		roomResponse.Status = http.StatusNotFound
+		roomResponse.Message = "Not Found"
+		roomResponse.Data = err
+		log.Println(err)
+		w.Write([]byte("Data Not Found"))
+	} else {
+		roomResponse.Status = http.StatusOK
+		roomResponse.Message = "Delete Room Success"
+		roomResponse.Data = idINT
+		byteOfCategories, err := json.Marshal(roomResponse)
+		if err != nil {
+			log.Println(err)
+			w.Write([]byte("Opps, Something Wrong"))
+		}
+		w.Write([]byte(byteOfCategories))
+	}
+
+	log.Println("Endpoint hit: Delete room")
 }
