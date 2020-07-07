@@ -1,0 +1,3 @@
+2020-07-07 19:04:31 Accessing path /rooms/booked with application PostmanRuntime/7.26.1
+2020-07-07 19:05:46 Accessing path /rooms/booked with application PostmanRuntime/7.26.1
+2020-07-07 19:16:51 Accessing path /reserves with application PostmanRuntime/7.26.1

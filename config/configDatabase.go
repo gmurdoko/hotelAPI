@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"hotelAPI/utils"
 	"log"
+
+	//for connection mysql db
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // var (
@@ -25,29 +28,13 @@ func EnvConn() *sql.DB {
 	dbSchema := utils.ViperGetEnv("DB_SCHEMA", "schema")
 
 	dbSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPassword, dbHost, dbPort, dbSchema)
-	db, err := connDB(dbEngine, dbSource)
+	db, err := sql.Open(dbEngine, dbSource)
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
+	}
+	err = db.Ping()
+	if err != nil {
+		log.Fatal(err)
 	}
 	return db
-	// return dbEngine, dbSource
-}
-
-func connCheck(db *sql.DB) (*sql.DB, error) {
-	err := db.Ping()
-	if err != nil {
-		log.Fatal(err)
-	}
-	// defer db.Close()
-	return db, err
-}
-
-//connDB Connecting app to DB using variabel from EnvConn
-func connDB(DbEngine, DbSource string) (db *sql.DB, err error) {
-	db, _ = sql.Open(DbEngine, DbSource)
-	db, err = connCheck(db)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return db, err
 }

@@ -5,6 +5,7 @@ import (
 	"hotelAPI/main/masters/controllers"
 	"hotelAPI/main/masters/repositories"
 	"hotelAPI/main/masters/usecases"
+	"hotelAPI/main/middleware/logger"
 
 	"github.com/gorilla/mux"
 )
@@ -20,4 +21,5 @@ func Init(r *mux.Router, db *sql.DB) {
 	reserveRepo := repositories.InitReserveRepoImpl(db)
 	reserveUsecase := usecases.InitReserveUsecaseImpl(reserveRepo)
 	controllers.ReserveController(r, reserveUsecase)
+	r.Use(logger.ActivityLogMiddleware)
 }
