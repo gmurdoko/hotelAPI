@@ -1,0 +1,16 @@
+Buat sebuah REST Service sederhana tentang reservasi kamar hotel.
+Dengan informasi sbb:
+1. Kebutuhan tentang informasi kamar hotel
+  - ID Kamar
+  - Nama Kamar
+  - harga kamar
+  - ketersediaan kamar hotel
+
+2. Dapat membuat kamar baru, mengupdate data kamar serta menghapus data kamar sebelumnya,
+3. Aplikasi dapat membuat reservasi kamar dengan ketentuan sebagai berikut
+   - Jika kamar tidak tersedia atau sudah terbooking sebelumnya berarti tidak bisa mereservasi kamar tersebut
+   - Jika kamar tersedia, berarti berhasil terbooking dan status ketersediaan kamarnya menjadi terbooking
+4. Dapat mencetak daftar kamar yang available dan tidak available
+
+Buatlah se-kreatif mungkin, gunakan prinsip2 arsitekur bersih,normalisasi database
+tambahkan validasi, fitur keamanan, konfigurasi yang dinamis
