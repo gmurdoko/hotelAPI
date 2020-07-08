@@ -2,12 +2,15 @@ package controllers
 
 import (
 	"encoding/json"
+	"hotelAPI/config"
 	"hotelAPI/main/masters/models"
 	"hotelAPI/main/masters/usecases"
+	"hotelAPI/main/middleware/token"
 	"hotelAPI/utils"
 	"log"
 	"net/http"
 
+	// "github.com/gmurdoko/middleware/middleware"
 	"github.com/gorilla/mux"
 )
 
@@ -19,15 +22,23 @@ type ReserveHandler struct {
 //ReserveController app
 func ReserveController(r *mux.Router, s usecases.ReserveUsecase) {
 	reserveHandler := ReserveHandler{s}
-	cat := r.PathPrefix("/reserves").Subrouter()
-	cat.HandleFunc("", reserveHandler.ListReserves).Methods(http.MethodGet)
-	// cat.HandleFunc("/available", roomHandler.ListAvailableRooms).Methods(http.MethodGet)
-	// cat.HandleFunc("/booked", roomHandler.ListBookedRooms).Methods(http.MethodGet)
-	cat = r.PathPrefix("/reserve").Subrouter()
-	cat.HandleFunc("", reserveHandler.PostReserve).Methods(http.MethodPost)
-	// cat.HandleFunc("", roomHandler.PutRoom).Methods(http.MethodPut)
-	// cat.HandleFunc("/{id}", roomHandler.DeleteRoom).Methods(http.MethodDelete)
 
+	rss := r.PathPrefix("/reserves").Subrouter()
+	rve := r.PathPrefix("/reserve").Subrouter()
+	isAuthOn := config.AuthSwitch()
+	if isAuthOn {
+		rss.Use(token.TokenValidationMiddleware)
+		rve.Use(token.TokenValidationMiddleware)
+		detailReserveController(rss, rve, reserveHandler)
+	} else {
+		detailReserveController(rss, rve, reserveHandler)
+	}
+
+}
+
+func detailReserveController(rss, rve *mux.Router, reserveHandler ReserveHandler) {
+	rss.HandleFunc("", reserveHandler.ListReserves).Methods(http.MethodGet)
+	rve.HandleFunc("", reserveHandler.PostReserve).Methods(http.MethodPost)
 }
 
 //ListReserves app
@@ -36,22 +47,12 @@ func (s *ReserveHandler) ListReserves(w http.ResponseWriter, r *http.Request) {
 	var reserveResponse utils.Response
 	w.Header().Set("content-type", "application/json")
 	if err != nil {
-		reserveResponse.Status = http.StatusNotFound
-		reserveResponse.Message = "Not Found"
-		reserveResponse.Data = err
+		reserveResponse = utils.Response{Status: http.StatusNotFound, Message: "Not Found", Data: err.Error()}
+		utils.ResponseWrite(&reserveResponse, w)
 		log.Println(err)
-		w.Write([]byte("Data Not Found"))
 	} else {
-		reserveResponse.Status = http.StatusOK
-		reserveResponse.Message = "Get All Reserve Success"
-		reserveResponse.Data = reserves
-
-		byteOfReserves, err := json.Marshal(reserveResponse)
-		if err != nil {
-			log.Println(err)
-			w.Write([]byte("Opps, Something Wrong"))
-		}
-		w.Write([]byte(byteOfReserves))
+		reserveResponse = utils.Response{Status: http.StatusOK, Message: "Get All Room Success", Data: reserves}
+		utils.ResponseWrite(&reserveResponse, w)
 	}
 	log.Println("Endpoint hit: Get All Reserve")
 }
@@ -120,20 +121,12 @@ func (s *ReserveHandler) PostReserve(w http.ResponseWriter, r *http.Request) {
 	}
 	err = s.ReserveUsecase.PostReserve(&inReserve)
 	if err != nil {
-		reserveResponse.Status = http.StatusNotFound
-		reserveResponse.Message = "Not Found"
-		reserveResponse.Data = err
+		reserveResponse = utils.Response{Status: http.StatusBadRequest, Message: "Error", Data: err.Error()}
+		utils.ResponseWrite(&reserveResponse, w)
 		log.Println(err)
-		w.Write([]byte("Data Not Found"))
 	} else {
-		reserveResponse.Status = http.StatusOK
-		reserveResponse.Message = "Post Reserve Success"
-		reserveResponse.Data = inReserve
-		byteOfReserves, err := json.Marshal(reserveResponse)
-		if err != nil {
-			w.Write([]byte("Opps, Something Wrong"))
-		}
-		w.Write([]byte(byteOfReserves))
+		reserveResponse = utils.Response{Status: http.StatusOK, Message: "Get All Room Success", Data: inReserve}
+		utils.ResponseWrite(&reserveResponse, w)
 	}
 
 	log.Println("Endpoint hit: Post Reserve")

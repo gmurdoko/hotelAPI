@@ -3,6 +3,7 @@ package usecases
 import (
 	"hotelAPI/main/masters/models"
 	"hotelAPI/main/masters/repositories"
+	"hotelAPI/utils/validation"
 )
 
 //RoomUsecaseImpl app
@@ -39,7 +40,11 @@ func (s RoomUsecaseImpl) GetAllRoom() ([]*models.Rooms, error) {
 
 //PostRoom app
 func (s RoomUsecaseImpl) PostRoom(inRoom *models.Rooms) error {
-	err := s.roomRepo.AddRoom(inRoom)
+	err := validation.ValidateInputNotNil(inRoom.RoomName, inRoom.Price)
+	if err != nil {
+		return err
+	}
+	err = s.roomRepo.AddRoom(inRoom)
 	if err != nil {
 		return err
 	}

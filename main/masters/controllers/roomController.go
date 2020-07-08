@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"encoding/json"
+	"hotelAPI/config"
 	"hotelAPI/main/masters/models"
 	"hotelAPI/main/masters/usecases"
+	"hotelAPI/main/middleware/token"
 	"hotelAPI/utils"
 	"log"
 	"net/http"
@@ -20,15 +22,27 @@ type RoomHandler struct {
 //RoomController app
 func RoomController(r *mux.Router, s usecases.RoomUsecase) {
 	roomHandler := RoomHandler{s}
-	cat := r.PathPrefix("/rooms").Subrouter()
-	cat.HandleFunc("", roomHandler.ListRooms).Methods(http.MethodGet)
-	cat.HandleFunc("/available", roomHandler.ListAvailableRooms).Methods(http.MethodGet)
-	cat.HandleFunc("/booked", roomHandler.ListBookedRooms).Methods(http.MethodGet)
-	cat = r.PathPrefix("/room").Subrouter()
-	cat.HandleFunc("", roomHandler.PostRoom).Methods(http.MethodPost)
-	cat.HandleFunc("", roomHandler.PutRoom).Methods(http.MethodPut)
-	cat.HandleFunc("/{id}", roomHandler.DeleteRoom).Methods(http.MethodDelete)
+	rooms := r.PathPrefix("/rooms").Subrouter()
+	room := r.PathPrefix("/room").Subrouter()
+	isAuthOn := config.AuthSwitch()
+	if isAuthOn {
+		rooms.Use(token.TokenValidationMiddleware)
+		room.Use(token.TokenValidationMiddleware)
+		detailRoomController(rooms, room, roomHandler)
+	} else {
+		detailRoomController(rooms, room, roomHandler)
+	}
+}
 
+func detailRoomController(rooms, room *mux.Router, roomHandler RoomHandler) {
+	//Jamak
+	rooms.HandleFunc("", roomHandler.ListRooms).Methods(http.MethodGet)
+	rooms.HandleFunc("/available", roomHandler.ListAvailableRooms).Methods(http.MethodGet)
+	rooms.HandleFunc("/booked", roomHandler.ListBookedRooms).Methods(http.MethodGet)
+	//Satuan
+	room.HandleFunc("", roomHandler.PostRoom).Methods(http.MethodPost)
+	room.HandleFunc("", roomHandler.PutRoom).Methods(http.MethodPut)
+	room.HandleFunc("/{id}", roomHandler.DeleteRoom).Methods(http.MethodDelete)
 }
 
 //ListRooms app
@@ -37,22 +51,12 @@ func (s *RoomHandler) ListRooms(w http.ResponseWriter, r *http.Request) {
 	var roomResponse utils.Response
 	w.Header().Set("content-type", "application/json")
 	if err != nil {
-		roomResponse.Status = http.StatusNotFound
-		roomResponse.Message = "Not Found"
-		roomResponse.Data = err
+		roomResponse = utils.Response{Status: http.StatusNotFound, Message: "Not Found", Data: err.Error()}
+		utils.ResponseWrite(&roomResponse, w)
 		log.Println(err)
-		w.Write([]byte("Data Not Found"))
 	} else {
-		roomResponse.Status = http.StatusOK
-		roomResponse.Message = "Get All Room Success"
-		roomResponse.Data = rooms
-
-		byteOfRooms, err := json.Marshal(roomResponse)
-		if err != nil {
-			log.Println(err)
-			w.Write([]byte("Opps, Something Wrong"))
-		}
-		w.Write([]byte(byteOfRooms))
+		roomResponse = utils.Response{Status: http.StatusOK, Message: "Get All Room Success", Data: rooms}
+		utils.ResponseWrite(&roomResponse, w)
 	}
 	log.Println("Endpoint hit: Get All Room")
 }
@@ -63,22 +67,12 @@ func (s *RoomHandler) ListAvailableRooms(w http.ResponseWriter, r *http.Request)
 	var roomResponse utils.Response
 	w.Header().Set("content-type", "application/json")
 	if err != nil {
-		roomResponse.Status = http.StatusNotFound
-		roomResponse.Message = "Not Found"
-		roomResponse.Data = err
+		roomResponse = utils.Response{Status: http.StatusNotFound, Message: "Not Found", Data: err.Error()}
+		utils.ResponseWrite(&roomResponse, w)
 		log.Println(err)
-		w.Write([]byte("Data Not Found"))
 	} else {
-		roomResponse.Status = http.StatusOK
-		roomResponse.Message = "Get Available Room Success"
-		roomResponse.Data = rooms
-
-		byteOfRooms, err := json.Marshal(roomResponse)
-		if err != nil {
-			log.Println(err)
-			w.Write([]byte("Opps, Something Wrong"))
-		}
-		w.Write([]byte(byteOfRooms))
+		roomResponse = utils.Response{Status: http.StatusOK, Message: "Get Available Room Success", Data: rooms}
+		utils.ResponseWrite(&roomResponse, w)
 	}
 	log.Println("Endpoint hit: Get Available Rooms")
 }
@@ -89,22 +83,12 @@ func (s *RoomHandler) ListBookedRooms(w http.ResponseWriter, r *http.Request) {
 	var roomResponse utils.Response
 	w.Header().Set("content-type", "application/json")
 	if err != nil {
-		roomResponse.Status = http.StatusNotFound
-		roomResponse.Message = "Not Found"
-		roomResponse.Data = err
+		roomResponse = utils.Response{Status: http.StatusNotFound, Message: "Not Found", Data: err.Error()}
+		utils.ResponseWrite(&roomResponse, w)
 		log.Println(err)
-		w.Write([]byte("Data Not Found"))
 	} else {
-		roomResponse.Status = http.StatusOK
-		roomResponse.Message = "Get Booked Room Success"
-		roomResponse.Data = rooms
-
-		byteOfRooms, err := json.Marshal(roomResponse)
-		if err != nil {
-			log.Println(err)
-			w.Write([]byte("Opps, Something Wrong"))
-		}
-		w.Write([]byte(byteOfRooms))
+		roomResponse = utils.Response{Status: http.StatusOK, Message: "Get Booked Room Success", Data: rooms}
+		utils.ResponseWrite(&roomResponse, w)
 	}
 	log.Println("Endpoint hit: Get Booked Rooms")
 }
@@ -121,22 +105,13 @@ func (s *RoomHandler) PostRoom(w http.ResponseWriter, r *http.Request) {
 	}
 	err = s.RoomUsecase.PostRoom(&inRoom)
 	if err != nil {
-		roomResponse.Status = http.StatusNotFound
-		roomResponse.Message = "Not Found"
-		roomResponse.Data = err
+		roomResponse = utils.Response{Status: http.StatusBadRequest, Message: "Error", Data: err.Error()}
+		utils.ResponseWrite(&roomResponse, w)
 		log.Println(err)
-		w.Write([]byte("Data Not Found"))
 	} else {
-		roomResponse.Status = http.StatusOK
-		roomResponse.Message = "Post Room Success"
-		roomResponse.Data = inRoom
-		byteOfRooms, err := json.Marshal(roomResponse)
-		if err != nil {
-			w.Write([]byte("Opps, Something Wrong"))
-		}
-		w.Write([]byte(byteOfRooms))
+		roomResponse = utils.Response{Status: http.StatusAccepted, Message: "Post Room Success", Data: inRoom}
+		utils.ResponseWrite(&roomResponse, w)
 	}
-
 	log.Println("Endpoint hit: Post Room")
 }
 
@@ -151,21 +126,12 @@ func (s *RoomHandler) PutRoom(w http.ResponseWriter, r *http.Request) {
 	}
 	err = s.RoomUsecase.PutRoom(&inRoom)
 	if err != nil {
-		roomResponse.Status = http.StatusNotFound
-		roomResponse.Message = "Not Found"
-		roomResponse.Data = err
+		roomResponse = utils.Response{Status: http.StatusBadRequest, Message: "Error", Data: err.Error()}
+		utils.ResponseWrite(&roomResponse, w)
 		log.Println(err)
-		w.Write([]byte("Data Not Found"))
 	} else {
-		roomResponse.Status = http.StatusOK
-		roomResponse.Message = "Put Room Success"
-		roomResponse.Data = inRoom
-		byteOfRooms, err := json.Marshal(roomResponse)
-		if err != nil {
-			log.Println(err)
-			w.Write([]byte("Opps, Something Wrong"))
-		}
-		w.Write([]byte(byteOfRooms))
+		roomResponse = utils.Response{Status: http.StatusAccepted, Message: "Put Room Success", Data: inRoom}
+		utils.ResponseWrite(&roomResponse, w)
 	}
 	log.Println("Endpoint hit: Put Room")
 }
@@ -178,21 +144,12 @@ func (s *RoomHandler) DeleteRoom(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	err = s.RoomUsecase.DeleteRoom(idINT)
 	if err != nil {
-		roomResponse.Status = http.StatusNotFound
-		roomResponse.Message = "Not Found"
-		roomResponse.Data = err
+		roomResponse = utils.Response{Status: http.StatusBadRequest, Message: "Error", Data: err.Error()}
+		utils.ResponseWrite(&roomResponse, w)
 		log.Println(err)
-		w.Write([]byte("Data Not Found"))
 	} else {
-		roomResponse.Status = http.StatusOK
-		roomResponse.Message = "Delete Room Success"
-		roomResponse.Data = idINT
-		byteOfCategories, err := json.Marshal(roomResponse)
-		if err != nil {
-			log.Println(err)
-			w.Write([]byte("Opps, Something Wrong"))
-		}
-		w.Write([]byte(byteOfCategories))
+		roomResponse = utils.Response{Status: http.StatusAccepted, Message: "Delete Room Success", Data: idINT}
+		utils.ResponseWrite(&roomResponse, w)
 	}
 
 	log.Println("Endpoint hit: Delete room")

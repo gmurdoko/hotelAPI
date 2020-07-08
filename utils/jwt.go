@@ -11,7 +11,7 @@ import (
 
 const (
 	hmacSampleSecret = "rahasiadong"
-	expiredPeriod    = 120
+	expiredPeriod    = 600
 )
 
 //JwtEncoder app

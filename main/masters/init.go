@@ -21,5 +21,10 @@ func Init(r *mux.Router, db *sql.DB) {
 	reserveRepo := repositories.InitReserveRepoImpl(db)
 	reserveUsecase := usecases.InitReserveUsecaseImpl(reserveRepo)
 	controllers.ReserveController(r, reserveUsecase)
+
+	//Auth
+	userRepo := repositories.InitUserRepoImpl(db)
+	userUsecase := usecases.InitUserUsecaseImpl(userRepo)
+	controllers.UserController(r, userUsecase)
 	r.Use(logger.ActivityLogMiddleware)
 }
