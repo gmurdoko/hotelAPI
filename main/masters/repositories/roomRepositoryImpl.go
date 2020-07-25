@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"hotelAPI/main/masters/models"
 	"log"
+	"strconv"
 	"time"
 )
 
@@ -100,7 +101,7 @@ func (s RoomRepoImpl) AddRoom(inRoom *models.Rooms) error {
 		return err
 	}
 	//insert into prices (room_id, price, created_at) values (3,300000,now());
-	inRoom.ID = int(lastID)
+	inRoom.ID = strconv.Itoa(int(lastID))
 	query = "insert into prices (room_id, price, created_at, edited_at) values (?,?,?,?)"
 	res, err = tx.Exec(query, inRoom.ID, inRoom.Price, inRoom.CreatedAt, inRoom.CreatedAt)
 	if err != nil {

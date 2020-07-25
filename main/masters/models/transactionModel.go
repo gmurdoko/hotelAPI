@@ -4,7 +4,7 @@ package models
 type Reserves struct {
 	Nik          string `json:"nik"`
 	CustomerName string `json:"customerName"`
-	RoomID       int    `json:"roomID"`
+	RoomID       string `json:"roomID"`
 	RoomName     string `json:"roomName"`
 	BookedAt     string `json:"bookedAt"`
 	EndedAt      string `json:"endedAt"`
