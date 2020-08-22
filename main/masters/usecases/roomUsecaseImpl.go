@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"fmt"
 	"hotelAPI/main/masters/models"
 	"hotelAPI/main/masters/repositories"
 	"hotelAPI/utils/validation"
@@ -30,12 +31,13 @@ func (s RoomUsecaseImpl) GetBookedRoom() ([]*models.Rooms, error) {
 }
 
 //GetAllRoom app
-func (s RoomUsecaseImpl) GetAllRoom() ([]*models.Rooms, error) {
-	rooms, err := s.roomRepo.SelectAllRoom()
+func (s RoomUsecaseImpl) GetAllRoom(keyword, offset, limit, status, orderBy, sort string) ([]*models.Rooms, *int, error) {
+	rooms, totalField, err := s.roomRepo.SelectAllRoom(keyword, offset, limit, status, orderBy, sort)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return rooms, nil
+	fmt.Println("useCase", *totalField)
+	return rooms, totalField, nil
 }
 
 //PostRoom app

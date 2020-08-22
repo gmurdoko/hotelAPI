@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"hotelAPI/config"
 	"hotelAPI/main/masters/models"
 	"hotelAPI/main/masters/usecases"
@@ -36,7 +37,7 @@ func RoomController(r *mux.Router, s usecases.RoomUsecase) {
 
 func detailRoomController(rooms, room *mux.Router, roomHandler RoomHandler) {
 	//Jamak
-	rooms.HandleFunc("", roomHandler.ListRooms).Methods(http.MethodGet)
+	rooms.HandleFunc("", roomHandler.ListRooms).Queries("keyword", "{keyword}", "page", "{page}", "limit", "{limit}", "status", "{status}", "orderBy", "{orderBy}", "sort", "{sort}").Methods(http.MethodGet)
 	rooms.HandleFunc("/available", roomHandler.ListAvailableRooms).Methods(http.MethodGet)
 	rooms.HandleFunc("/booked", roomHandler.ListBookedRooms).Methods(http.MethodGet)
 	//Satuan
@@ -47,15 +48,22 @@ func detailRoomController(rooms, room *mux.Router, roomHandler RoomHandler) {
 
 //ListRooms app
 func (s *RoomHandler) ListRooms(w http.ResponseWriter, r *http.Request) {
-	rooms, err := s.RoomUsecase.GetAllRoom()
+	offset := mux.Vars(r)["page"]
+	limit := mux.Vars(r)["limit"]
+	status := mux.Vars(r)["status"]
+	orderBy := mux.Vars(r)["orderBy"]
+	sort := mux.Vars(r)["sort"]
+	keyword := mux.Vars(r)["keyword"]
+	fmt.Println("keyword:", keyword, "offset:", offset, "limit:", limit, "status:", status, "orderBy:", orderBy, "sort:", sort)
+	rooms, totalField, err := s.RoomUsecase.GetAllRoom(keyword, offset, limit, status, orderBy, sort)
 	var roomResponse utils.Response
 	w.Header().Set("content-type", "application/json")
 	if err != nil {
-		roomResponse = utils.Response{Status: http.StatusNotFound, Message: "Not Found", Data: err.Error()}
+		roomResponse = utils.Response{Status: http.StatusNotFound, Message: "Not Found", TotalField: *totalField, Data: err.Error()}
 		utils.ResponseWrite(&roomResponse, w)
 		log.Println(err)
 	} else {
-		roomResponse = utils.Response{Status: http.StatusOK, Message: "Get All Room Success", Data: rooms}
+		roomResponse = utils.Response{Status: http.StatusOK, Message: "Get All Room Success", TotalField: *totalField, Data: rooms}
 		utils.ResponseWrite(&roomResponse, w)
 	}
 	log.Println("Endpoint hit: Get All Room")
@@ -101,7 +109,7 @@ func (s *RoomHandler) PostRoom(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&inRoom)
 	if err != nil {
 		log.Println(err)
-		w.Write([]byte("cant read JSON"))
+		// w.Write([]byte("cant read JSON"))
 	}
 	err = s.RoomUsecase.PostRoom(&inRoom)
 	if err != nil {
@@ -122,7 +130,7 @@ func (s *RoomHandler) PutRoom(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	err := json.NewDecoder(r.Body).Decode(&inRoom)
 	if err != nil {
-		w.Write([]byte("cant read JSON"))
+		// w.Write([]byte("cant read JSON"))
 	}
 	err = s.RoomUsecase.PutRoom(&inRoom)
 	if err != nil {

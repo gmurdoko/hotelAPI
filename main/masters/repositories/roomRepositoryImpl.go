@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"fmt"
 	"hotelAPI/main/masters/models"
 	"log"
 	"time"
@@ -14,7 +15,7 @@ type RoomRepoImpl struct {
 
 //SelectAvailableRoom app
 func (s RoomRepoImpl) SelectAvailableRoom() ([]*models.Rooms, error) {
-	data, err := s.db.Query("select mr.id, mr.room_name, p.price, mr.status, mr.created_at, mr.edited_at from m_rooms mr join prices p on mr.id = p.room_id where mr.status ='A' and p.status ='A';")
+	data, err := s.db.Query("select mr.id, mr.room_name, p.price, mr.status, mr.created_at, mr.edited_at from m_rooms mr join prices p on mr.id = p.room_id where mr.status ='A' and p.status ='A' order by mr.id;")
 	if err != nil {
 		return nil, err
 	}
@@ -36,26 +37,40 @@ func (s RoomRepoImpl) SelectAvailableRoom() ([]*models.Rooms, error) {
 }
 
 //SelectAllRoom app
-func (s RoomRepoImpl) SelectAllRoom() ([]*models.Rooms, error) {
-	data, err := s.db.Query("select mr.id, mr.room_name, p.price, mr.status, mr.created_at, mr.edited_at from m_rooms mr join prices p on mr.id = p.room_id where p.status ='A';")
+func (s RoomRepoImpl) SelectAllRoom(keyword, offset, limit, status, orderBy, sort string) ([]*models.Rooms, *int, error) {
+	queryIn := fmt.Sprintf(`select mr.id, mr.room_name, p.price, mr.status, mr.created_at, mr.edited_at from m_rooms mr join prices p on mr.id = p.room_id where p.status ='A' and mr.status= ? and (mr.room_name LIKE ? or price LIKE ?) order by %s %s limit %s , %s;`, orderBy, sort, offset, limit)
+	// fmt.Println(query)
+	data, err := s.db.Query(queryIn, status, "%"+keyword+"%", "%"+keyword+"%")
+	// fmt.Println(s.db.Query(queryIn, status, "%"+keyword+"%", "%"+keyword+"%"))
 	if err != nil {
-		return nil, err
+		// fmt.Println(err, "error")
+		return nil, nil, err
+
 	}
+	// fmt.Println("ini saya")
+
 	defer data.Close()
 	var result = []*models.Rooms{}
 	for data.Next() {
+		// fmt.Println("ini data:", data)
 		var room = models.Rooms{}
 		var err = data.Scan(&room.ID, &room.RoomName, &room.Price, &room.Status, &room.CreatedAt, &room.UpdatedAt)
 		if err != nil {
 			log.Println(err)
-			return nil, err
+			return nil, nil, err
 		}
 		result = append(result, &room)
 	}
 	if err = data.Err(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return result, nil
+	var totalField = new(int)
+	err = s.db.QueryRow(`select COUNT(*) from m_rooms mr join prices p on mr.id = p.room_id where p.status ='A' and mr.status=? ;`, status).Scan(&totalField)
+	if err != nil {
+		return nil, nil, err
+	}
+	fmt.Println("total Field", *totalField)
+	return result, totalField, nil
 }
 
 //SelectBookedRoom app
