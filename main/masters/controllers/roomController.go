@@ -41,6 +41,7 @@ func detailRoomController(rooms, room *mux.Router, roomHandler RoomHandler) {
 	rooms.HandleFunc("/available", roomHandler.ListAvailableRooms).Methods(http.MethodGet)
 	rooms.HandleFunc("/booked", roomHandler.ListBookedRooms).Methods(http.MethodGet)
 	//Satuan
+	room.HandleFunc("/{id}", roomHandler.Room).Methods(http.MethodGet)
 	room.HandleFunc("", roomHandler.PostRoom).Methods(http.MethodPost)
 	room.HandleFunc("", roomHandler.PutRoom).Methods(http.MethodPut)
 	room.HandleFunc("/{id}", roomHandler.DeleteRoom).Methods(http.MethodDelete)
@@ -161,4 +162,22 @@ func (s *RoomHandler) DeleteRoom(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Println("Endpoint hit: Delete room")
+}
+
+//Room app
+func (s *RoomHandler) Room(w http.ResponseWriter, r *http.Request) {
+	var roomResponse utils.Response
+	ex := mux.Vars(r)
+	idINT, err := strconv.Atoi(ex["id"])
+	room, err := s.RoomUsecase.GetRoom(idINT)
+	w.Header().Set("content-type", "application/json")
+	if err != nil {
+		roomResponse = utils.Response{Status: http.StatusNotFound, Message: "Not Found", Data: err.Error()}
+		utils.ResponseWrite(&roomResponse, w)
+		log.Println(err)
+	} else {
+		roomResponse = utils.Response{Status: http.StatusOK, Message: "Get Room Success", Data: room}
+		utils.ResponseWrite(&roomResponse, w)
+	}
+	log.Println("Endpoint hit: Get Room")
 }

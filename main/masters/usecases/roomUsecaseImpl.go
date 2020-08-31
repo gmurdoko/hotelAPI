@@ -71,6 +71,15 @@ func (s RoomUsecaseImpl) DeleteRoom(id int) error {
 	return nil
 }
 
+//GetRoom app
+func (s RoomUsecaseImpl) GetRoom(id int) (*models.Rooms, error) {
+	room, err := s.roomRepo.SelectRoom(id)
+	if err != nil {
+		return nil, err
+	}
+	return room, nil
+}
+
 //InitRoomUsecaseImpl app
 func InitRoomUsecaseImpl(roomRepo repositories.RoomRepository) RoomUsecase {
 	return &RoomUsecaseImpl{roomRepo}

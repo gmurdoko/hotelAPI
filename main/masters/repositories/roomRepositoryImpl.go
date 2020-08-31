@@ -179,6 +179,16 @@ func (s RoomRepoImpl) DelRoom(id int) error {
 	return nil
 }
 
+//SelectRoom app
+func (s RoomRepoImpl) SelectRoom(id int) (*models.Rooms, error) {
+	var room = new(models.Rooms)
+	err := s.db.QueryRow("select mr.id, mr.room_name, p.price, mr.status, mr.created_at, mr.edited_at from m_rooms mr join prices p on mr.id = p.room_id where mr.id = ? and p.status ='A'", id).Scan(&room.ID, &room.RoomName, &room.Price, &room.Status, &room.CreatedAt, &room.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return room, nil
+}
+
 //InitRoomRepoImpl app
 func InitRoomRepoImpl(db *sql.DB) RoomRepository {
 	return &RoomRepoImpl{db}

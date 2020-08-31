@@ -7505,3 +7505,9 @@
 2020-07-30 08:57:32 Accessing path /rooms?keyword=&page=15&limit=5&status=A&orderBy=mr.id&sort=ASC with application Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36
 2020-07-30 08:57:37 Accessing path /rooms?keyword=&page=0&limit=5&status=A&orderBy=mr.id&sort=ASC with application Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36
 2020-07-30 08:57:39 Accessing path /rooms?keyword=&page=25&limit=5&status=A&orderBy=mr.id&sort=ASC with application Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36
+2020-08-22 21:55:48 Accessing path /room with application PostmanRuntime/7.26.3
+2020-08-22 21:56:21 Accessing path /room/6 with application PostmanRuntime/7.26.3
+2020-08-22 21:56:24 Accessing path /room/1 with application PostmanRuntime/7.26.3
+2020-08-22 21:57:13 Accessing path /rooms/available with application PostmanRuntime/7.26.3
+2020-08-22 21:57:24 Accessing path /rooms/booked with application PostmanRuntime/7.26.3
+2020-08-22 22:01:46 Accessing path /room/6 with application PostmanRuntime/7.26.3

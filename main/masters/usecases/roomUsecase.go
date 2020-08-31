@@ -12,6 +12,5 @@ type RoomUsecase interface {
 	PostRoom(inRoom *models.Rooms) error
 	PutRoom(inRoom *models.Rooms) error
 	DeleteRoom(id int) error
-	// GetRoom(id int) (*models.Categories, error)
-
+	GetRoom(id int) (*models.Rooms, error)
 }

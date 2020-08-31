@@ -10,4 +10,5 @@ type RoomRepository interface {
 	AddRoom(inRoom *models.Rooms) error
 	EditRoom(inRoom *models.Rooms) error
 	DelRoom(id int) error
+	SelectRoom(id int) (*models.Rooms, error)
 }
