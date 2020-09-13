@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"hotelAPI/config"
 	"hotelAPI/main/masters/models"
 	"hotelAPI/main/masters/usecases"
@@ -55,7 +54,7 @@ func (s *RoomHandler) ListRooms(w http.ResponseWriter, r *http.Request) {
 	orderBy := mux.Vars(r)["orderBy"]
 	sort := mux.Vars(r)["sort"]
 	keyword := mux.Vars(r)["keyword"]
-	fmt.Println("keyword:", keyword, "offset:", offset, "limit:", limit, "status:", status, "orderBy:", orderBy, "sort:", sort)
+	// fmt.Println("keyword:", keyword, "offset:", offset, "limit:", limit, "status:", status, "orderBy:", orderBy, "sort:", sort)
 	rooms, totalField, err := s.RoomUsecase.GetAllRoom(keyword, offset, limit, status, orderBy, sort)
 	var roomResponse utils.Response
 	w.Header().Set("content-type", "application/json")

@@ -168,7 +168,7 @@ func (s RoomRepoImpl) DelRoom(id int) error {
 		return err
 	}
 
-	query := "update m_rooms set status = 'D', edited_at = now() where id = ?;"
+	query := "UPDATE m_ticket SET status = 'D' WHERE id = ?;"
 	_, err = tx.Exec(query, id)
 	if err != nil {
 		tx.Rollback()

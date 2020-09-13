@@ -7511,3 +7511,7 @@
 2020-08-22 21:57:13 Accessing path /rooms/available with application PostmanRuntime/7.26.3
 2020-08-22 21:57:24 Accessing path /rooms/booked with application PostmanRuntime/7.26.3
 2020-08-22 22:01:46 Accessing path /room/6 with application PostmanRuntime/7.26.3
+2020-09-13 10:51:17 Accessing path /auth with application Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36
+2020-09-13 10:51:19 Accessing path /auth with application Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36
+2020-09-13 10:51:38 Accessing path /auth with application Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36
+2020-09-13 10:52:46 Accessing path /auth with application Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36
