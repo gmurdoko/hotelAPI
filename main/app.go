@@ -10,4 +10,6 @@ func main() {
 	router := config.CreateRouter()
 	masters.Init(router, db)
 	config.RunServer(router)
+	//test
+	
 }
